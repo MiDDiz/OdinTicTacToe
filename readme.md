@@ -3,7 +3,7 @@ The main goal is to make a game of Tic Tac Toe using objects, factory functions 
 
 The base functionality hast to manage PvP games, ties, puntuation, and restarts.
 The main focus is the logic, aesthetics will be a low priority.
-You can play the game (Clicking on this link)[middiz.github.io/OdinTicTacToe].
+You can play the game [Clicking on this link](https://middiz.github.io/OdinTicTacToe).
 
 This code is under Creative Commons (CC BY-NC). 
     If you want to use it you must accredit me @ MiDDiz and state one of my socials:
