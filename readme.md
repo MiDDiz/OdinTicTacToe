@@ -7,5 +7,5 @@ You can play the game [Clicking on this link](https://middiz.github.io/OdinTicTa
 
 This code is under Creative Commons (CC BY-NC). 
     If you want to use it you must accredit me @ MiDDiz and state one of my socials:
-    Github: (https://www.github.com/MiDDiz)[https://www.github.com/MiDDiz] or (https://middiz.github.io/main)[https://middiz.github.io/main]
-    Twitter: (https://www.twitter.com/_MiDDiz)[https://www.twitter.com/_MiDDiz]
+    Github: [https://www.github.com/MiDDiz](https://www.github.com/MiDDiz) or [https://middiz.github.io/main](https://middiz.github.io/main)
+    Twitter: [https://www.twitter.com/_MiDDiz](https://www.twitter.com/_MiDDiz)
