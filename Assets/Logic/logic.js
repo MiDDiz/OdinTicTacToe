@@ -9,3 +9,56 @@
 */
 
 console.log('Init');
+
+// Module for GameBoard
+const GameBoard = (() => {
+	//Private vars and functions
+	let Table = [];
+
+	//Public vars and functions
+	const Init = () => {};
+	return { Init };
+})();
+
+// Module for render display
+
+const DisplayRenderer = (() => {
+	//Private vars and functions
+	let domElements;
+
+	//Public vars and functions
+	const GetDomElements = () => domElements;
+	const Init = () => {
+		domElements = document.getElementsByClassName('tile');
+
+		//Test area
+		for (i = 0; i < domElements.length; i++) {
+			console.log(domElements[i]);
+			//
+			let element = domElements[i];
+			element.addEventListener('click', () => {
+				console.log(element);
+				element.style.background = 'red';
+				element.innerHTML = 'X';
+			});
+		}
+	};
+
+	return { Init, GetDomElements };
+})();
+
+//Factory for player
+const Player = () => {
+	//Private vars and funcitons
+	let points = 0;
+
+	//Public vars and functions
+	const getPoints = () => points;
+	const addPoints = () => {
+		points += 1;
+	};
+
+	return { getPoints, addPoints };
+};
+
+DisplayRenderer.Init();
