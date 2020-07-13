@@ -27,11 +27,58 @@ const GameBoard = (() => {
 
 	const GetCurrentPlayer = () => currentPlayer;
 
+	const SwitchCurrentPlayer = () => {
+		if (GetCurrentPlayer().getSign() === 1) {
+			SetCurrentPlayer(Player2);
+		} else {
+			SetCurrentPlayer(Player1);
+		}
+	};
+
 	const SetGameState = (state) => {
 		gameState = state;
 	};
 
 	const GetGameState = () => gameState;
+
+	const CheckColumn = (index, sign) => {
+		// We are checking for inequalities, if the column has a sign that isnt the one we are looking for, that column is not suitable for a win condition.
+		let Check = true;
+		Table.forEach((e) => {
+			if (e[index] != sign) {
+				console.log(e[index]);
+				Check = false;
+			}
+		});
+		// If all "e[index]" are equal to our sign, it means that this column is suitable to be a win condition, thus returning true.
+		return Check;
+	};
+	const CheckRow = (index, sign) => {
+		// We are also checking for inequealities. If the whole row is equal to the sign, we return true, thus the current player won.
+		let Check = true;
+		Table[index].forEach((e) => {
+			if (e != sign) {
+				Check = false;
+			}
+		});
+		return Check;
+	};
+
+	const CheckForWin = (sign) => {
+		let hasWon = false;
+		// Check columns.
+		//Check column 1
+		if (CheckColumn(0, sign) || CheckColumn(1, sign) || CheckColumn(2, sign)) {
+			console.log(CheckColumn(0, sign));
+			hasWon = true;
+			console.log('Column');
+		}
+		if (CheckRow(0, sign) || CheckRow(1, sign) || CheckRow(2, sign)) {
+			console.log('Row');
+			hasWon = true;
+		}
+		return hasWon;
+	};
 
 	const GameMain = (tilePosition) => {
 		// If the game is paused, then do nothing.
@@ -45,13 +92,16 @@ const GameBoard = (() => {
 			return;
 		} else {
 			Table[tilePosition[0]][tilePosition[1]] = GetCurrentPlayer().getSign();
-			if (GetCurrentPlayer().getSign() === 1) {
-				SetCurrentPlayer(Player2);
-			} else {
-				SetCurrentPlayer(Player1);
+
+			if (CheckForWin(GetCurrentPlayer().getSign())) {
+				// Make win logic
+				console.log(`Player ${GetCurrentPlayer().getSign()} has won!`);
+				SetGameState(false);
 			}
+			// Else continue game.
 
 			DisplayRenderer.Refresh(domElements, Table);
+			SwitchCurrentPlayer();
 		}
 	};
 
@@ -106,16 +156,16 @@ const DisplayRenderer = (() => {
 	};
 */
 	const Refresh = (dom, Table) => {
-		console.log(dom);
+		//console.log(dom);
 		for (let i = 0; i < 9; i++) {
 			if (Table[Math.floor(i / 3)][i % 3] === GameBoard.GetPlayer1().getSign()) {
-				console.log('Player1');
+				//	console.log('Player1');
 				dom[i].className = 'tile player1';
 			} else if (Table[Math.floor(i / 3)][i % 3] === GameBoard.GetPlayer2().getSign()) {
-				console.log('Player2');
+				//	console.log('Player2');
 				dom[i].className = 'tile player2';
 			}
-			console.log('Not');
+			//console.log('Not');
 		}
 	};
 	const Init = () => {
