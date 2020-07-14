@@ -1,8 +1,21 @@
+html,
+body,
+#main_wrapper {
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+}
+
 .game_area {
 	margin: 0 auto;
-	background-color: bisque;
+	/*background-color: bisque;*/
+	border: 1px solid black;
 	height: 40em;
 	width: 40em;
+	justify-content: center;
+	align-items: center;
+	margin-top: 5em;
 }
 
 .row {
@@ -19,9 +32,9 @@
 	height: 100%;
 }
 
-.player1{
+.player1 {
 	background-color: chartreuse;
 }
-.player2{
+.player2 {
 	background-color: red;
 }

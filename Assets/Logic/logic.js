@@ -19,7 +19,7 @@ const GameBoard = (() => {
 	let Player1;
 	let Player2;
 	//The Game table is a bidemensional array. 0 represents emptyness, 1 reresents slots from player 1 and 2 represents slots of player two.
-	let Table = [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
+	let Table;
 
 	const SetCurrentPlayer = (Player) => {
 		currentPlayer = Player;
@@ -48,6 +48,7 @@ const GameBoard = (() => {
 			if (e[index] != sign) {
 				console.log(e[index]);
 				Check = false;
+				return;
 			}
 		});
 		// If all "e[index]" are equal to our sign, it means that this column is suitable to be a win condition, thus returning true.
@@ -59,8 +60,33 @@ const GameBoard = (() => {
 		Table[index].forEach((e) => {
 			if (e != sign) {
 				Check = false;
+				return;
 			}
 		});
+		return Check;
+	};
+
+	const CheckCross = (type, sign) => {
+		let Check = true;
+		if (type === 1) {
+			let i = 0;
+			Table.forEach((e) => {
+				if (e[i] != sign) {
+					console.log('HERE');
+					Check = false;
+				}
+				i += 1;
+			});
+		} else {
+			let i = 2;
+			Table.forEach((e) => {
+				if (e[i] != sign) {
+					console.log('HERE TOO');
+					Check = false;
+				}
+				i -= 1;
+			});
+		}
 		return Check;
 	};
 
@@ -72,14 +98,24 @@ const GameBoard = (() => {
 			console.log(CheckColumn(0, sign));
 			hasWon = true;
 			console.log('Column');
-		}
-		if (CheckRow(0, sign) || CheckRow(1, sign) || CheckRow(2, sign)) {
+		} else if (CheckRow(0, sign) || CheckRow(1, sign) || CheckRow(2, sign)) {
 			console.log('Row');
+			hasWon = true;
+		} else if (CheckCross(1, sign) || CheckCross(2, sign)) {
 			hasWon = true;
 		}
 		return hasWon;
 	};
 
+	const CheckForDraw = () => {
+		let full = true;
+		Table.forEach((row) => {
+			row.forEach((tile) => {
+				if (tile === 0) full = false;
+			});
+		});
+		return full;
+	};
 	const GameMain = (tilePosition) => {
 		// If the game is paused, then do nothing.
 		if (!GetGameState()) return;
@@ -92,24 +128,33 @@ const GameBoard = (() => {
 			return;
 		} else {
 			Table[tilePosition[0]][tilePosition[1]] = GetCurrentPlayer().getSign();
-
+			DisplayRenderer.Refresh(domElements, Table);
 			if (CheckForWin(GetCurrentPlayer().getSign())) {
 				// Make win logic
 				console.log(`Player ${GetCurrentPlayer().getSign()} has won!`);
 				SetGameState(false);
+
+				GameBoard.Init();
+			} else if (CheckForDraw()) {
+				GetCurrentPlayer().addPoints();
+
+				GameBoard.Init();
 			}
 			// Else continue game.
-
-			DisplayRenderer.Refresh(domElements, Table);
+			// Do this through the DOM
 			SwitchCurrentPlayer();
 		}
 	};
 
 	//Public vars and functions
 	const Init = () => {
-		Player1 = Player(1);
-		Player2 = Player(2);
-		SetCurrentPlayer(Player1);
+		// Check if they haven't been initialized.
+		if (typeof Player1 === 'undefined') {
+			Player1 = Player(1);
+			Player2 = Player(2);
+			SetCurrentPlayer(Player1);
+		}
+		Table = [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
 		//TODO: Have to change this, in order to make it happen when you play start.
 		SetGameState(true);
 
@@ -132,18 +177,26 @@ const GameBoard = (() => {
 		}
 	};
 
-	const GetDomElements = () => domElements;
-	const GetTable = () => Table;
 	const GetPlayer1 = () => Player1;
 	const GetPlayer2 = () => Player2;
 
-	return { Init, GetTable, GetDomElements, GetPlayer1, GetPlayer2, domElements, Table };
+	return {
+		Init,
+		GetPlayer1,
+		GetPlayer2,
+		domElements,
+		Table
+	};
 })();
 
 // Module for render display
 
 const DisplayRenderer = (() => {
 	//Private vars and functions
+	let main_dom;
+
+	//TOOD: Dinamically creates the menu.
+	const SpawnMainMenu = () => {};
 
 	//Public vars and functions
 	/*
@@ -169,10 +222,16 @@ const DisplayRenderer = (() => {
 		}
 	};
 	const Init = () => {
-		//Test area
+		//Get html root.
+		main_dom = document.getElementById('main_wrapper');
+
+		SpawnMainMenu();
 	};
 
-	return { Init, Refresh };
+	return {
+		Init,
+		Refresh
+	};
 })();
 
 //Factory for player
@@ -189,5 +248,9 @@ const Player = (Sign) => {
 		points += 1;
 	};
 
-	return { getPoints, addPoints, getSign };
+	return {
+		getPoints,
+		addPoints,
+		getSign
+	};
 };
