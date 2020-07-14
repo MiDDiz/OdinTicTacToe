@@ -66,13 +66,13 @@ const GameBoard = (() => {
 		return Check;
 	};
 
+	// Checks if there are 3, same-sign, elements in the array. There are two types of crosses so for the sake of code economy, we use the same function.
 	const CheckCross = (type, sign) => {
 		let Check = true;
 		if (type === 1) {
 			let i = 0;
 			Table.forEach((e) => {
 				if (e[i] != sign) {
-					console.log('HERE');
 					Check = false;
 				}
 				i += 1;
@@ -81,7 +81,6 @@ const GameBoard = (() => {
 			let i = 2;
 			Table.forEach((e) => {
 				if (e[i] != sign) {
-					console.log('HERE TOO');
 					Check = false;
 				}
 				i -= 1;
@@ -95,11 +94,8 @@ const GameBoard = (() => {
 		// Check columns.
 		//Check column 1
 		if (CheckColumn(0, sign) || CheckColumn(1, sign) || CheckColumn(2, sign)) {
-			console.log(CheckColumn(0, sign));
 			hasWon = true;
-			console.log('Column');
 		} else if (CheckRow(0, sign) || CheckRow(1, sign) || CheckRow(2, sign)) {
-			console.log('Row');
 			hasWon = true;
 		} else if (CheckCross(1, sign) || CheckCross(2, sign)) {
 			hasWon = true;
@@ -117,6 +113,7 @@ const GameBoard = (() => {
 		return full;
 	};
 	const GameMain = (tilePosition) => {
+		//TODO fix bug, that lets you keep playing.
 		// If the game is paused, then do nothing.
 		if (!GetGameState()) return;
 		// Else
@@ -195,19 +192,86 @@ const DisplayRenderer = (() => {
 	//Private vars and functions
 	let main_dom;
 
+	const SpawnGameBoard = () => {
+		//Spawn the game Board.
+		let game = document.createElement('div');
+		let rows = [ document.createElement('div'), document.createElement('div'), document.createElement('div') ];
+		rows.forEach((row) => {
+			row.setAttribute('class', 'row');
+			for (let i = 0; i < 3; i++) {
+				let tile = document.createElement('div');
+				tile.setAttribute('class', 'tile');
+				//TODO if necesarry, set ID (its on /Container/index.html)
+				//tile.setAttribute()
+				row.appendChild(tile);
+			}
+			game.appendChild(row);
+		});
+		game.setAttribute('class', 'game_area');
+		main_dom.appendChild(game);
+		GameBoard.Init();
+	};
+
 	//TOOD: Dinamically creates the menu.
-	const SpawnMainMenu = () => {};
+	const SpawnMainMenu = () => {
+		let menu = document.createElement('div');
+		let header = document.createElement('div');
+		let text = document.createElement('span');
+		let buttons = document.createElement('div');
+		menu.setAttribute('id', 'menu');
+		header.setAttribute('class', 'header');
+		text.setAttribute('id', 'text');
+		buttons.setAttribute('class', 'buttons');
+
+		menu.appendChild(header);
+		menu.appendChild(text);
+		menu.appendChild(buttons);
+
+		headers_childs = [ document.createElement('span'), document.createElement('span') ];
+		headers_childs[0].textContent = 'Play!';
+		headers_childs[0].setAttribute('class', 'header_span_one');
+
+		headers_childs[1].textContent = 'Tic Tac Toe';
+		headers_childs[1].setAttribute('class', 'header_span_two');
+
+		headers_childs.forEach((e) => {
+			header.appendChild(e);
+		});
+
+		buttons_childs = [ document.createElement('button'), document.createElement('button') ];
+		buttons_childs[0].textContent = 'Player';
+		buttons_childs[0].setAttribute('id', 'player_button');
+
+		buttons_childs[1].textContent = 'Computer';
+		buttons_childs[1].setAttribute('id', 'computer_button');
+
+		buttons_childs.forEach((e) => {
+			buttons.appendChild(e);
+		});
+
+		main_dom.appendChild(menu);
+
+		MenuHandler.InitialMenu();
+	};
 
 	//Public vars and functions
-	/*
-	const TileLogic = (position, element) => {
-		let myPos = position;
-		let domElement = element;
-		const treatedPosition = [ Math.floor(myPos / 3), myPos % 3 ];
-		console.log('Hello :D ' + treatedPosition);
-		domElement.style.background = 'red';
+
+	const SwapRoot = (root) => {
+		//Clear the DOM
+		let child = main_dom.lastElementChild;
+		while (child) {
+			main_dom.removeChild(child);
+			child = main_dom.lastElementChild;
+		}
+
+		//Generate new DOM
+		if (root === 'menu') {
+			SpawnMainMenu();
+		} else if (root === 'game') {
+			SpawnGameBoard();
+		}
 	};
-*/
+
 	const Refresh = (dom, Table) => {
 		//console.log(dom);
 		for (let i = 0; i < 9; i++) {
@@ -218,7 +282,6 @@ const DisplayRenderer = (() => {
 				//	console.log('Player2');
 				dom[i].className = 'tile player2';
 			}
-			//console.log('Not');
 		}
 	};
 	const Init = () => {
@@ -230,7 +293,34 @@ const DisplayRenderer = (() => {
 
 	return {
 		Init,
-		Refresh
+		Refresh,
+		SwapRoot,
+
+		//TODO delete this
+		main_dom
+	};
+})();
+
+const MenuHandler = (() => {
+	//Private
+	const GetMenuButtons = () => {
+		return [ document.getElementById('player_button'), document.getElementById('computer_button') ];
+	};
+	//Public
+	const InitialMenu = () => {
+		let myButtons = GetMenuButtons();
+		myButtons[0].addEventListener('click', () => {
+			//Play game normally
+			console.log('Click');
+			DisplayRenderer.SwapRoot('game');
+		});
+		myButtons[1].addEventListener('click', () => {
+			// TODO: Implement AI
+			console.error('AI NOT IMPLEMENTED!');
+		});
+	};
+	return {
+		InitialMenu
 	};
 })();
 

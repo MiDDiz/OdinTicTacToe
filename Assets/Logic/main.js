@@ -8,4 +8,4 @@ const DomHandler = (() => {
 	// Do things
 })();
 // TODO: Use the DOM to handle this execution
-GameBoard.Init();
+DisplayRenderer.Init();
