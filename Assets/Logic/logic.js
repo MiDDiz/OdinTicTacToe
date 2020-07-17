@@ -46,7 +46,6 @@ const GameBoard = (() => {
 		let Check = true;
 		Table.forEach((e) => {
 			if (e[index] != sign) {
-				console.log(e[index]);
 				Check = false;
 				return;
 			}
@@ -113,29 +112,30 @@ const GameBoard = (() => {
 		return full;
 	};
 	const GameMain = (tilePosition) => {
-		//TODO fix bug, that lets you keep playing.
 		// If the game is paused, then do nothing.
 		if (!GetGameState()) return;
 		// Else
 
 		if (Table[tilePosition[0]][tilePosition[1]]) {
 			// The tile is already occupied.
+			console.log(Table);
 			alert('The tile has been played already!');
 
 			return;
 		} else {
 			Table[tilePosition[0]][tilePosition[1]] = GetCurrentPlayer().getSign();
 			DisplayRenderer.Refresh(domElements, Table);
+
 			if (CheckForWin(GetCurrentPlayer().getSign())) {
 				// Make win logic
-				console.log(`Player ${GetCurrentPlayer().getSign()} has won!`);
-				SetGameState(false);
 
-				GameBoard.Init();
-			} else if (CheckForDraw()) {
 				GetCurrentPlayer().addPoints();
-
-				GameBoard.Init();
+				alert(`Player ${GetCurrentPlayer().getSign()} has won!`);
+				SetGameState(false);
+				setTimeout(DisplayRenderer.SwapRoot('game'), 10000);
+			} else if (CheckForDraw()) {
+				alert("It's a tie!");
+				setTimeout(DisplayRenderer.SwapRoot('game'), 3000);
 			}
 			// Else continue game.
 			// Do this through the DOM
@@ -146,32 +146,32 @@ const GameBoard = (() => {
 	//Public vars and functions
 	const Init = () => {
 		// Check if they haven't been initialized.
+		Table = [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
 		if (typeof Player1 === 'undefined') {
 			Player1 = Player(1);
 			Player2 = Player(2);
 			SetCurrentPlayer(Player1);
+			domElements = document.getElementsByClassName('tile');
 		}
-		Table = [ [ 0, 0, 0 ], [ 0, 0, 0 ], [ 0, 0, 0 ] ];
-		//TODO: Have to change this, in order to make it happen when you play start.
-		SetGameState(true);
 
-		domElements = document.getElementsByClassName('tile');
 		for (let i = 0; i < domElements.length; i++) {
-			console.log(domElements[i]);
-			//
 			let element = domElements[i];
 			let index = i;
 
 			element.addEventListener('click', () => {
 				const treatedPosition = [ Math.floor(index / 3), index % 3 ];
-				//Debug proposes.
 
-				// Dont play if game is not running.
 				GameMain(treatedPosition);
 
 				console.log(`Position: ${treatedPosition[0]} ${treatedPosition[1]}`);
 			});
 		}
+
+		console.log('Table, cleared: ' + Table);
+		DisplayRenderer.SetPoints();
+		SetGameState(true);
+
+		DisplayRenderer.Refresh(domElements, Table);
 	};
 
 	const GetPlayer1 = () => Player1;
@@ -182,7 +182,8 @@ const GameBoard = (() => {
 		GetPlayer1,
 		GetPlayer2,
 		domElements,
-		Table
+		Table,
+		GetGameState
 	};
 })();
 
@@ -201,14 +202,49 @@ const DisplayRenderer = (() => {
 			for (let i = 0; i < 3; i++) {
 				let tile = document.createElement('div');
 				tile.setAttribute('class', 'tile');
-				//TODO if necesarry, set ID (its on /Container/index.html)
-				//tile.setAttribute()
+
 				row.appendChild(tile);
 			}
 			game.appendChild(row);
 		});
 		game.setAttribute('class', 'game_area');
+
+		// Spawn Players display.
+		let players = [ document.createElement('div'), document.createElement('div') ];
+		players[0].setAttribute('class', 'player1_area');
+		players[1].setAttribute('class', 'player2_area');
+
+		let player1_head = document.createElement('span');
+		player1_head.setAttribute('class', 'player_title');
+		player1_head.textContent = 'Player 1 points';
+
+		let player1_points = document.createElement('span');
+		player1_points.setAttribute('id', 'player1_points');
+		player1_points.setAttribute('class', 'player_points');
+
+		player1_points.textContent = '0';
+
+		players[0].appendChild(player1_head);
+		players[0].appendChild(document.createElement('br'));
+		players[0].appendChild(player1_points);
+
+		let player2_head = document.createElement('span');
+		player2_head.setAttribute('class', 'player_title');
+		player2_head.textContent = 'Player 2 points';
+
+		let player2_points = document.createElement('span');
+		player2_points.setAttribute('id', 'player2_points');
+		player2_points.setAttribute('class', 'player_points');
+		player2_points.textContent = '0';
+
+		players[1].appendChild(player2_head);
+		players[1].appendChild(document.createElement('br'));
+		players[1].appendChild(player2_points);
+
+		main_dom.setAttribute('class', 'game_wrapper');
+		main_dom.appendChild(players[0]);
 		main_dom.appendChild(game);
+		main_dom.appendChild(players[1]);
 		GameBoard.Init();
 	};
 
@@ -239,10 +275,14 @@ const DisplayRenderer = (() => {
 		});
 
 		buttons_childs = [ document.createElement('button'), document.createElement('button') ];
-		buttons_childs[0].textContent = 'Player';
+		let span1 = document.createElement('span');
+		span1.textContent = 'PLAYER';
+		buttons_childs[0].appendChild(span1);
 		buttons_childs[0].setAttribute('id', 'player_button');
 
-		buttons_childs[1].textContent = 'Computer';
+		let span2 = document.createElement('span');
+		span2.textContent = 'COMPUTER';
+		buttons_childs[1].appendChild(span2);
 		buttons_childs[1].setAttribute('id', 'computer_button');
 
 		buttons_childs.forEach((e) => {
@@ -255,6 +295,11 @@ const DisplayRenderer = (() => {
 	};
 
 	//Public vars and functions
+
+	const SetPoints = () => {
+		document.getElementById('player1_points').textContent = GameBoard.GetPlayer1().getPoints();
+		document.getElementById('player2_points').textContent = GameBoard.GetPlayer2().getPoints();
+	};
 
 	const SwapRoot = (root) => {
 		//Clear the DOM
@@ -273,13 +318,15 @@ const DisplayRenderer = (() => {
 	};
 
 	const Refresh = (dom, Table) => {
-		//console.log(dom);
+		console.log(dom);
 		for (let i = 0; i < 9; i++) {
 			if (Table[Math.floor(i / 3)][i % 3] === GameBoard.GetPlayer1().getSign()) {
 				//	console.log('Player1');
+				dom[i].textContent = 'X';
 				dom[i].className = 'tile player1';
 			} else if (Table[Math.floor(i / 3)][i % 3] === GameBoard.GetPlayer2().getSign()) {
 				//	console.log('Player2');
+				dom[i].textContent = 'O';
 				dom[i].className = 'tile player2';
 			}
 		}
@@ -295,9 +342,7 @@ const DisplayRenderer = (() => {
 		Init,
 		Refresh,
 		SwapRoot,
-
-		//TODO delete this
-		main_dom
+		SetPoints
 	};
 })();
 
@@ -316,7 +361,7 @@ const MenuHandler = (() => {
 		});
 		myButtons[1].addEventListener('click', () => {
 			// TODO: Implement AI
-			console.error('AI NOT IMPLEMENTED!');
+			alert('Not implemented ;(');
 		});
 	};
 	return {
@@ -328,6 +373,7 @@ const MenuHandler = (() => {
 const Player = (Sign) => {
 	//Private vars and funcitons
 	let points = 0;
+
 	//It is used in order to know what to display.
 	let sign = Sign;
 
@@ -344,3 +390,4 @@ const Player = (Sign) => {
 		getSign
 	};
 };
+DisplayRenderer.Init();
